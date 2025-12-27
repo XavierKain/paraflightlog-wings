@@ -447,10 +447,20 @@ async function confirmDelete() {
 }
 
 // GitHub API functions
-async function getFileSha(path) {
+async function getFileSha(path, noCache = false) {
     try {
-        const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`, {
-            headers: { 'Authorization': `Bearer ${githubToken}` }
+        // Utiliser l'API avec un paramètre timestamp pour éviter le cache
+        const cacheBuster = noCache ? `&_t=${Date.now()}` : '';
+        const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}${cacheBuster}`, {
+            headers: {
+                'Authorization': `Bearer ${githubToken}`,
+                // Headers pour désactiver le cache HTTP
+                ...(noCache ? {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'If-None-Match': ''
+                } : {})
+            }
         });
 
         if (response.ok) {
@@ -515,8 +525,11 @@ async function deleteFile(path) {
     });
 }
 
-async function saveCatalog() {
-    const sha = await getFileSha('wings.json');
+async function saveCatalog(retryCount = 0) {
+    const maxRetries = 3;
+
+    // Récupérer le SHA frais avec cache-busting
+    const sha = await getFileSha('wings.json', true);
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(catalog, null, 2))));
 
     const body = {
@@ -539,8 +552,22 @@ async function saveCatalog() {
     });
 
     if (!response.ok) {
-        throw new Error('Failed to save catalog');
+        const errorData = await response.json().catch(() => ({}));
+
+        // Erreur 409 = conflit de SHA (fichier modifié entre-temps)
+        // Erreur 422 = SHA invalide
+        if ((response.status === 409 || response.status === 422) && retryCount < maxRetries) {
+            console.warn(`SHA conflict, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
+            // Attendre un peu avant de réessayer (backoff exponentiel)
+            await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+            return saveCatalog(retryCount + 1);
+        }
+
+        throw new Error(`Failed to save catalog: ${errorData.message || response.statusText}`);
     }
+
+    // Après succès, attendre un peu pour laisser GitHub propager le changement
+    await new Promise(resolve => setTimeout(resolve, 500));
 }
 
 // ============================================
