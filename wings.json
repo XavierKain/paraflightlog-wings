@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T21:54:13.879Z",
+  "lastUpdated": "2025-12-27T22:19:53.273Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -21,6 +21,10 @@
     {
       "id": "other",
       "name": "Autres"
+    },
+    {
+      "id": "dudek",
+      "name": "Dudek"
     }
   ],
   "wings": [
