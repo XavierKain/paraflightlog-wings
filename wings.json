@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T21:53:20.062Z",
+  "lastUpdated": "2025-12-27T21:54:13.879Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -104,6 +104,22 @@
         "15"
       ],
       "imageUrl": "images/line.png",
+      "year": null
+    },
+    {
+      "id": "flare-bandit",
+      "manufacturer": "flare",
+      "model": "Bandit",
+      "fullName": "Flare Bandit",
+      "type": "Soaring",
+      "sizes": [
+        "10",
+        "13",
+        "16",
+        "19",
+        "22"
+      ],
+      "imageUrl": "images/flare-bandit.png",
       "year": null
     }
   ]
