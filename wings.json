@@ -1,0 +1,108 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2025-12-27T10:00:00Z",
+  "manufacturers": [
+    {
+      "id": "moustache",
+      "name": "Moustache"
+    },
+    {
+      "id": "skywalk",
+      "name": "Skywalk"
+    },
+    {
+      "id": "niviuk",
+      "name": "Niviuk"
+    },
+    {
+      "id": "u-turn",
+      "name": "U-Turn"
+    },
+    {
+      "id": "other",
+      "name": "Autres"
+    }
+  ],
+  "wings": [
+    {
+      "id": "moustache-m1-2025",
+      "manufacturer": "moustache",
+      "model": "M1 2025",
+      "fullName": "Moustache M1 2025",
+      "type": "Soaring",
+      "sizes": ["13", "15", "18", "20", "22", "24"],
+      "imageUrl": "images/moustache-m1-2025.png",
+      "year": 2025
+    },
+    {
+      "id": "moustache-m1-2024",
+      "manufacturer": "moustache",
+      "model": "M1 2024",
+      "fullName": "Moustache M1 2024",
+      "type": "Soaring",
+      "sizes": ["13", "15", "18", "20", "22", "24"],
+      "imageUrl": "images/moustache-m1-2024.png",
+      "year": 2024
+    },
+    {
+      "id": "moustache-m1",
+      "manufacturer": "moustache",
+      "model": "M1",
+      "fullName": "Moustache M1",
+      "type": "Soaring",
+      "sizes": ["13", "15", "18", "20", "22", "24"],
+      "imageUrl": "images/moustache-m1.png",
+      "year": null
+    },
+    {
+      "id": "moustache-m2",
+      "manufacturer": "moustache",
+      "model": "M2",
+      "fullName": "Moustache M2",
+      "type": "Soaring",
+      "sizes": ["13", "15", "18", "20", "22"],
+      "imageUrl": "images/moustache-m2.png",
+      "year": null
+    },
+    {
+      "id": "skywalk-chili5",
+      "manufacturer": "skywalk",
+      "model": "Chili 5",
+      "fullName": "Skywalk Chili 5",
+      "type": "Thermique",
+      "sizes": ["23", "25", "26", "28"],
+      "imageUrl": "images/skywalk-chili5.png",
+      "year": null
+    },
+    {
+      "id": "niviuk-arak",
+      "manufacturer": "niviuk",
+      "model": "ARAK",
+      "fullName": "Niviuk ARAK",
+      "type": "Thermique",
+      "sizes": ["21", "23", "25", "27"],
+      "imageUrl": "images/niviuk-arak.png",
+      "year": null
+    },
+    {
+      "id": "u-turn-prop",
+      "manufacturer": "u-turn",
+      "model": "Prop",
+      "fullName": "U-Turn Prop",
+      "type": "Soaring",
+      "sizes": ["19", "21", "23"],
+      "imageUrl": "images/u-turn-prop.png",
+      "year": null
+    },
+    {
+      "id": "other-line",
+      "manufacturer": "other",
+      "model": "Line",
+      "fullName": "Line",
+      "type": "Speedflying",
+      "sizes": ["13", "15", "17"],
+      "imageUrl": "images/line.png",
+      "year": null
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParaFlightLog - Wing Library Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>ParaFlightLog Wing Library</h1>
+        <div id="auth-section">
+            <button id="login-btn" onclick="showLoginModal()">Se connecter</button>
+            <span id="user-info" style="display: none;">
+                <span id="username"></span>
+                <button onclick="logout()">Déconnexion</button>
+            </span>
+        </div>
+    </header>
+
+    <main>
+        <!-- Stats -->
+        <section class="stats">
+            <div class="stat-card">
+                <span class="stat-number" id="wing-count">0</span>
+                <span class="stat-label">Voiles</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="manufacturer-count">0</span>
+                <span class="stat-label">Fabricants</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="last-update">-</span>
+                <span class="stat-label">Dernière MAJ</span>
+            </div>
+        </section>
+
+        <!-- Actions -->
+        <section class="actions">
+            <button class="btn btn-primary" onclick="showAddWingModal()" id="add-wing-btn" disabled>
+                + Ajouter une voile
+            </button>
+            <button class="btn btn-secondary" onclick="refreshCatalog()">
+                Rafraîchir
+            </button>
+        </section>
+
+        <!-- Wing List -->
+        <section class="wing-list" id="wing-list">
+            <p class="loading">Chargement...</p>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('login-modal')">&times;</span>
+            <h2>Connexion GitHub</h2>
+            <p>Entrez votre Personal Access Token GitHub avec les permissions <code>repo</code>.</p>
+            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx">
+            <button class="btn btn-primary" onclick="login()">Se connecter</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Wing Modal -->
+    <div id="wing-modal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeModal('wing-modal')">&times;</span>
+            <h2 id="wing-modal-title">Ajouter une voile</h2>
+            <form id="wing-form" onsubmit="saveWing(event)">
+                <input type="hidden" id="wing-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="wing-manufacturer">Fabricant</label>
+                        <select id="wing-manufacturer" required>
+                            <option value="">Sélectionner...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="wing-model">Modèle</label>
+                        <input type="text" id="wing-model" required placeholder="Ex: M1 2025">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="wing-type">Type</label>
+                        <select id="wing-type" required>
+                            <option value="Soaring">Soaring</option>
+                            <option value="Thermique">Thermique</option>
+                            <option value="Cross">Cross-country</option>
+                            <option value="Acro">Acrobatie</option>
+                            <option value="Speedflying">Speedflying</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="wing-year">Année (optionnel)</label>
+                        <input type="number" id="wing-year" min="2000" max="2030" placeholder="2025">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="wing-sizes">Tailles (séparées par des virgules)</label>
+                    <input type="text" id="wing-sizes" required placeholder="Ex: 13, 15, 18, 20, 22, 24">
+                </div>
+
+                <div class="form-group">
+                    <label for="wing-image">Image (PNG avec transparence, max 400x400)</label>
+                    <input type="file" id="wing-image" accept="image/png,image/jpeg">
+                    <div id="image-preview"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('wing-modal')">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('delete-modal')">&times;</span>
+            <h2>Confirmer la suppression</h2>
+            <p>Êtes-vous sûr de vouloir supprimer <strong id="delete-wing-name"></strong> ?</p>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Annuler</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
