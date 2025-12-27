@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T18:36:30.354Z",
+  "lastUpdated": "2025-12-27T18:37:34.632Z",
   "manufacturers": [
     {
       "id": "moustache",
@@ -93,9 +93,12 @@
       "fullName": "U-Turn Prop",
       "type": "Soaring",
       "sizes": [
-        "19",
+        "14",
+        "16",
+        "18",
         "21",
-        "23"
+        "24",
+        "28"
       ],
       "imageUrl": "images/u-turn-prop.png",
       "year": null
