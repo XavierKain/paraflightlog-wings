@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T21:53:03.936Z",
+  "lastUpdated": "2025-12-27T21:53:20.062Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -70,21 +70,6 @@
         "30"
       ],
       "imageUrl": "images/skywalk-chili5.png",
-      "year": null
-    },
-    {
-      "id": "niviuk-arak",
-      "manufacturer": "niviuk",
-      "model": "ARAK",
-      "fullName": "Niviuk ARAK",
-      "type": "Thermique",
-      "sizes": [
-        "21",
-        "23",
-        "25",
-        "27"
-      ],
-      "imageUrl": "images/niviuk-arak.png",
       "year": null
     },
     {
