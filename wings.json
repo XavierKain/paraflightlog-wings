@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T21:51:45.658Z",
+  "lastUpdated": "2025-12-27T21:52:36.496Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -63,10 +63,11 @@
       "fullName": "Skywalk Chili 5",
       "type": "Thermique",
       "sizes": [
-        "23",
-        "25",
+        "22",
+        "24",
         "26",
-        "28"
+        "28",
+        "30"
       ],
       "imageUrl": "images/skywalk-chili5.png",
       "year": null
