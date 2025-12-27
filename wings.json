@@ -1,10 +1,10 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T18:37:34.632Z",
+  "lastUpdated": "2025-12-27T19:59:47.029Z",
   "manufacturers": [
     {
-      "id": "moustache",
-      "name": "Moustache"
+      "id": "flare",
+      "name": "Flare"
     },
     {
       "id": "skywalk",
@@ -26,9 +26,9 @@
   "wings": [
     {
       "id": "moustache-m1",
-      "manufacturer": "moustache",
+      "manufacturer": "flare",
       "model": "M1",
-      "fullName": "Moustache M1",
+      "fullName": "Flare M1",
       "type": "Soaring",
       "sizes": [
         "13",
@@ -42,9 +42,9 @@
     },
     {
       "id": "moustache-m2",
-      "manufacturer": "moustache",
+      "manufacturer": "flare",
       "model": "M2",
-      "fullName": "Moustache M2",
+      "fullName": "Flare M2",
       "type": "Soaring",
       "sizes": [
         "13",
