@@ -447,28 +447,26 @@ async function confirmDelete() {
 }
 
 // GitHub API functions
-async function getFileSha(path, noCache = false) {
+async function getFileSha(path) {
     try {
-        // Utiliser l'API avec un paramètre timestamp pour éviter le cache
-        const cacheBuster = noCache ? `&_t=${Date.now()}` : '';
-        const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}${cacheBuster}`, {
-            headers: {
-                'Authorization': `Bearer ${githubToken}`,
-                // Headers pour désactiver le cache HTTP
-                ...(noCache ? {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'If-None-Match': ''
-                } : {})
+        // Utiliser un timestamp unique pour éviter le cache navigateur
+        // Note: On ne peut pas utiliser Cache-Control headers avec CORS sur GitHub API
+        const timestamp = Date.now();
+        const response = await fetch(
+            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}&_=${timestamp}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${githubToken}`
+                }
             }
-        });
+        );
 
         if (response.ok) {
             const data = await response.json();
             return data.sha;
         }
     } catch {
-        // File doesn't exist
+        // File doesn't exist or error
     }
     return null;
 }
@@ -528,8 +526,35 @@ async function deleteFile(path) {
 async function saveCatalog(retryCount = 0) {
     const maxRetries = 3;
 
-    // Récupérer le SHA frais avec cache-busting
-    const sha = await getFileSha('wings.json', true);
+    // Récupérer le SHA frais avec timestamp pour éviter le cache
+    // Note: On ne peut pas utiliser Cache-Control headers avec CORS sur GitHub API
+    const timestamp = Date.now();
+    let sha = null;
+
+    try {
+        const shaResponse = await fetch(
+            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/wings.json?ref=${BRANCH}&_=${timestamp}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${githubToken}`
+                }
+            }
+        );
+
+        if (shaResponse.ok) {
+            const data = await shaResponse.json();
+            sha = data.sha;
+            console.log(`Got fresh SHA: ${sha.substring(0, 7)}...`);
+        } else if (shaResponse.status === 404) {
+            console.log('File does not exist yet, will create new file');
+            sha = null;
+        } else {
+            console.warn(`SHA fetch returned status ${shaResponse.status}`);
+        }
+    } catch (error) {
+        console.warn('Error fetching SHA:', error);
+    }
+
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(catalog, null, 2))));
 
     const body = {
@@ -538,9 +563,12 @@ async function saveCatalog(retryCount = 0) {
         branch: BRANCH
     };
 
+    // Ajouter SHA seulement si le fichier existe déjà
     if (sha) {
         body.sha = sha;
     }
+
+    console.log(`Saving catalog (attempt ${retryCount + 1}), SHA: ${sha ? sha.substring(0, 7) + '...' : 'none (new file)'}`);
 
     const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/wings.json`, {
         method: 'PUT',
@@ -553,20 +581,28 @@ async function saveCatalog(retryCount = 0) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.message || response.statusText;
+
+        console.error(`Save failed (${response.status}): ${errorMsg}`);
 
         // Erreur 409 = conflit de SHA (fichier modifié entre-temps)
-        // Erreur 422 = SHA invalide
+        // Erreur 422 = SHA invalide ou manquant
         if ((response.status === 409 || response.status === 422) && retryCount < maxRetries) {
-            console.warn(`SHA conflict, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
-            // Attendre un peu avant de réessayer (backoff exponentiel)
-            await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+            console.warn(`SHA conflict/invalid, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
+            // Attendre avec backoff exponentiel avant de réessayer
+            const delay = 1000 * Math.pow(2, retryCount);
+            await new Promise(resolve => setTimeout(resolve, delay));
             return saveCatalog(retryCount + 1);
         }
 
-        throw new Error(`Failed to save catalog: ${errorData.message || response.statusText}`);
+        throw new Error(`Failed to save catalog: ${errorMsg}`);
     }
 
-    // Après succès, attendre un peu pour laisser GitHub propager le changement
+    // Récupérer le nouveau SHA depuis la réponse pour les opérations suivantes
+    const responseData = await response.json();
+    console.log(`Catalog saved successfully, new SHA: ${responseData.content.sha.substring(0, 7)}...`);
+
+    // Attendre un peu pour laisser GitHub propager le changement
     await new Promise(resolve => setTimeout(resolve, 500));
 }
 
