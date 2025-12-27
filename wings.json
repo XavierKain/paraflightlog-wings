@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T21:52:36.496Z",
+  "lastUpdated": "2025-12-27T21:53:03.936Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -111,9 +111,12 @@
       "fullName": "Flare Line",
       "type": "Speedflying",
       "sizes": [
+        "8",
+        "9",
+        "10",
+        "11",
         "13",
-        "15",
-        "17"
+        "15"
       ],
       "imageUrl": "images/line.png",
       "year": null
