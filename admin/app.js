@@ -3,11 +3,23 @@ const REPO_OWNER = 'XavierKain';
 const REPO_NAME = 'paraflightlog-wings';
 const BRANCH = 'main';
 
+// GitHub OAuth App - Device Flow
+// Pour créer une OAuth App:
+// 1. Aller sur https://github.com/settings/developers
+// 2. Cliquer "New OAuth App"
+// 3. Application name: "ParaFlightLog Wing Admin"
+// 4. Homepage URL: https://xavierkain.github.io/paraflightlog-wings/admin/
+// 5. Authorization callback URL: https://xavierkain.github.io/paraflightlog-wings/admin/
+// 6. Cocher "Enable Device Flow"
+// 7. Copier le Client ID ici:
+const GITHUB_CLIENT_ID = 'Ov23lixuHuLOjz61wVOB';
+
 // State
 let catalog = null;
 let githubToken = null;
 let pendingDeleteId = null;
 let pendingDeleteManufacturerId = null;
+let deviceFlowInterval = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -26,9 +38,128 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Auth functions
 function showLoginModal() {
+    // Reset modal state
+    document.getElementById('token-input-section').style.display = 'block';
+    document.getElementById('device-flow-section').style.display = 'none';
+    document.getElementById('github-token').value = '';
     document.getElementById('login-modal').classList.add('show');
 }
 
+// OAuth Device Flow - Connexion avec compte GitHub
+async function loginWithGitHub() {
+    if (!GITHUB_CLIENT_ID) {
+        alert('OAuth non configuré. Utilisez un Personal Access Token.');
+        return;
+    }
+
+    try {
+        // Step 1: Request device and user codes
+        const codeResponse = await fetch('https://github.com/login/device/code', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                client_id: GITHUB_CLIENT_ID,
+                scope: 'repo'
+            })
+        });
+
+        if (!codeResponse.ok) {
+            throw new Error('Erreur lors de la demande de code');
+        }
+
+        const codeData = await codeResponse.json();
+
+        // Show device flow UI
+        document.getElementById('token-input-section').style.display = 'none';
+        document.getElementById('device-flow-section').style.display = 'block';
+        document.getElementById('device-user-code').textContent = codeData.user_code;
+        document.getElementById('device-verify-link').href = codeData.verification_uri;
+        document.getElementById('device-verify-link').textContent = codeData.verification_uri;
+
+        // Copy code to clipboard
+        try {
+            await navigator.clipboard.writeText(codeData.user_code);
+        } catch (e) {
+            // Clipboard not available
+        }
+
+        // Step 2: Poll for access token
+        const interval = codeData.interval || 5;
+        deviceFlowInterval = setInterval(async () => {
+            try {
+                const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        client_id: GITHUB_CLIENT_ID,
+                        device_code: codeData.device_code,
+                        grant_type: 'urn:ietf:params:oauth:grant-type:device_code'
+                    })
+                });
+
+                const tokenData = await tokenResponse.json();
+
+                if (tokenData.access_token) {
+                    clearInterval(deviceFlowInterval);
+                    deviceFlowInterval = null;
+
+                    githubToken = tokenData.access_token;
+                    localStorage.setItem('github_token', githubToken);
+
+                    // Validate and get username
+                    const userResponse = await fetch('https://api.github.com/user', {
+                        headers: { 'Authorization': `Bearer ${githubToken}` }
+                    });
+
+                    if (userResponse.ok) {
+                        const user = await userResponse.json();
+                        showLoggedIn(user.login);
+                        closeModal('login-modal');
+                    }
+                } else if (tokenData.error === 'authorization_pending') {
+                    // Still waiting, continue polling
+                } else if (tokenData.error === 'slow_down') {
+                    // Slow down polling
+                } else if (tokenData.error === 'expired_token') {
+                    clearInterval(deviceFlowInterval);
+                    deviceFlowInterval = null;
+                    alert('Code expiré. Veuillez réessayer.');
+                    document.getElementById('token-input-section').style.display = 'block';
+                    document.getElementById('device-flow-section').style.display = 'none';
+                } else if (tokenData.error === 'access_denied') {
+                    clearInterval(deviceFlowInterval);
+                    deviceFlowInterval = null;
+                    alert('Accès refusé.');
+                    document.getElementById('token-input-section').style.display = 'block';
+                    document.getElementById('device-flow-section').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }, interval * 1000);
+
+    } catch (error) {
+        alert('Erreur OAuth: ' + error.message);
+        console.error('OAuth error:', error);
+    }
+}
+
+function cancelDeviceFlow() {
+    if (deviceFlowInterval) {
+        clearInterval(deviceFlowInterval);
+        deviceFlowInterval = null;
+    }
+    document.getElementById('token-input-section').style.display = 'block';
+    document.getElementById('device-flow-section').style.display = 'none';
+}
+
+// Login with Personal Access Token
 async function login() {
     const token = document.getElementById('github-token').value.trim();
     if (!token) return;
@@ -37,7 +168,7 @@ async function login() {
 
     try {
         const response = await fetch('https://api.github.com/user', {
-            headers: { 'Authorization': `token ${token}` }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (response.ok) {
@@ -58,7 +189,7 @@ async function login() {
 async function validateToken() {
     try {
         const response = await fetch('https://api.github.com/user', {
-            headers: { 'Authorization': `token ${githubToken}` }
+            headers: { 'Authorization': `Bearer ${githubToken}` }
         });
 
         if (response.ok) {
@@ -85,6 +216,10 @@ function showLoggedIn(username) {
 function logout() {
     githubToken = null;
     localStorage.removeItem('github_token');
+    if (deviceFlowInterval) {
+        clearInterval(deviceFlowInterval);
+        deviceFlowInterval = null;
+    }
     document.getElementById('login-btn').style.display = 'block';
     document.getElementById('user-info').style.display = 'none';
     document.getElementById('add-wing-btn').disabled = true;
@@ -315,7 +450,7 @@ async function confirmDelete() {
 async function getFileSha(path) {
     try {
         const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`, {
-            headers: { 'Authorization': `token ${githubToken}` }
+            headers: { 'Authorization': `Bearer ${githubToken}` }
         });
 
         if (response.ok) {
@@ -351,7 +486,7 @@ async function uploadImage(file, path) {
     const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
         method: 'PUT',
         headers: {
-            'Authorization': `token ${githubToken}`,
+            'Authorization': `Bearer ${githubToken}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
@@ -369,7 +504,7 @@ async function deleteFile(path) {
     await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
         method: 'DELETE',
         headers: {
-            'Authorization': `token ${githubToken}`,
+            'Authorization': `Bearer ${githubToken}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -397,7 +532,7 @@ async function saveCatalog() {
     const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/wings.json`, {
         method: 'PUT',
         headers: {
-            'Authorization': `token ${githubToken}`,
+            'Authorization': `Bearer ${githubToken}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
