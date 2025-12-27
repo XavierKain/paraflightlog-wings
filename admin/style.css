@@ -344,6 +344,99 @@ main {
     padding: 2rem;
 }
 
+/* Manufacturer Management */
+.manufacturer-add-form {
+    background: #f5f5f7;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.manufacturer-add-form .form-row {
+    align-items: flex-end;
+    margin-bottom: 0;
+}
+
+.manufacturer-add-form .form-group {
+    margin-bottom: 0;
+}
+
+.manufacturers-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.manufacturer-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e8e8ed;
+}
+
+.manufacturer-item:last-child {
+    border-bottom: none;
+}
+
+.manufacturer-item:hover {
+    background: #f5f5f7;
+}
+
+.manufacturer-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.manufacturer-name {
+    font-weight: 600;
+}
+
+.manufacturer-id {
+    font-size: 0.75rem;
+    color: #86868b;
+    font-family: monospace;
+}
+
+.manufacturer-wing-count {
+    font-size: 0.75rem;
+    color: #0071e3;
+    margin-top: 0.25rem;
+}
+
+.manufacturer-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.manufacturer-actions button {
+    padding: 0.375rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.manufacturer-actions .edit-btn {
+    background: #e8e8ed;
+    color: #1d1d1f;
+}
+
+.manufacturer-actions .delete-btn {
+    background: #ffebe9;
+    color: #ff3b30;
+}
+
+.form-hint {
+    font-size: 0.75rem;
+    color: #86868b;
+    margin-top: 0.5rem;
+}
+
+.warning-text {
+    color: #ff9500;
+    font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .stats {
@@ -358,5 +451,14 @@ main {
         flex-direction: column;
         gap: 1rem;
         text-align: center;
+    }
+
+    .manufacturer-add-form .form-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .manufacturer-add-form .btn {
+        width: 100%;
     }
 }

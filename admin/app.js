@@ -7,6 +7,7 @@ const BRANCH = 'main';
 let catalog = null;
 let githubToken = null;
 let pendingDeleteId = null;
+let pendingDeleteManufacturerId = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -76,6 +77,7 @@ function showLoggedIn(username) {
     document.getElementById('user-info').style.display = 'flex';
     document.getElementById('username').textContent = username;
     document.getElementById('add-wing-btn').disabled = false;
+    document.getElementById('manage-manufacturers-btn').disabled = false;
 }
 
 function logout() {
@@ -84,6 +86,7 @@ function logout() {
     document.getElementById('login-btn').style.display = 'block';
     document.getElementById('user-info').style.display = 'none';
     document.getElementById('add-wing-btn').disabled = true;
+    document.getElementById('manage-manufacturers-btn').disabled = true;
 }
 
 // Catalog functions
@@ -400,5 +403,221 @@ async function saveCatalog() {
 
     if (!response.ok) {
         throw new Error('Failed to save catalog');
+    }
+}
+
+// ============================================
+// Manufacturer Management Functions
+// ============================================
+
+function showManufacturersModal() {
+    renderManufacturersList();
+    document.getElementById('new-manufacturer-name').value = '';
+    document.getElementById('new-manufacturer-id').value = '';
+    document.getElementById('manufacturers-modal').classList.add('show');
+}
+
+function renderManufacturersList() {
+    const container = document.getElementById('manufacturers-list');
+
+    if (!catalog || !catalog.manufacturers.length) {
+        container.innerHTML = '<p class="loading">Aucun fabricant</p>';
+        return;
+    }
+
+    // Sort manufacturers by name
+    const sortedManufacturers = [...catalog.manufacturers].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
+
+    container.innerHTML = sortedManufacturers.map(manufacturer => {
+        const wingCount = catalog.wings.filter(w => w.manufacturer === manufacturer.id).length;
+        return `
+            <div class="manufacturer-item">
+                <div class="manufacturer-info">
+                    <span class="manufacturer-name">${manufacturer.name}</span>
+                    <span class="manufacturer-id">${manufacturer.id}</span>
+                    <span class="manufacturer-wing-count">${wingCount} voile${wingCount !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="manufacturer-actions">
+                    <button class="edit-btn" onclick="editManufacturer('${manufacturer.id}')">Modifier</button>
+                    <button class="delete-btn" onclick="deleteManufacturer('${manufacturer.id}')">Supprimer</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function addManufacturer() {
+    if (!githubToken) {
+        alert('Veuillez vous connecter');
+        return;
+    }
+
+    const name = document.getElementById('new-manufacturer-name').value.trim();
+    let id = document.getElementById('new-manufacturer-id').value.trim().toLowerCase();
+
+    if (!name) {
+        alert('Veuillez entrer un nom de fabricant');
+        return;
+    }
+
+    // Auto-generate ID if not provided
+    if (!id) {
+        id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    }
+
+    // Check for duplicate ID
+    if (catalog.manufacturers.some(m => m.id === id)) {
+        alert('Un fabricant avec cet ID existe déjà');
+        return;
+    }
+
+    try {
+        catalog.manufacturers.push({ id, name });
+        catalog.lastUpdated = new Date().toISOString();
+
+        await saveCatalog();
+
+        document.getElementById('new-manufacturer-name').value = '';
+        document.getElementById('new-manufacturer-id').value = '';
+        renderManufacturersList();
+        updateStats();
+
+        alert('Fabricant ajouté !');
+    } catch (error) {
+        // Rollback
+        catalog.manufacturers = catalog.manufacturers.filter(m => m.id !== id);
+        alert('Erreur: ' + error.message);
+        console.error('Add manufacturer error:', error);
+    }
+}
+
+function editManufacturer(id) {
+    const manufacturer = catalog.manufacturers.find(m => m.id === id);
+    if (!manufacturer) return;
+
+    document.getElementById('edit-manufacturer-old-id').value = id;
+    document.getElementById('edit-manufacturer-name').value = manufacturer.name;
+    document.getElementById('edit-manufacturer-id').value = manufacturer.id;
+
+    document.getElementById('edit-manufacturer-modal').classList.add('show');
+}
+
+async function saveManufacturer(event) {
+    event.preventDefault();
+
+    if (!githubToken) {
+        alert('Veuillez vous connecter');
+        return;
+    }
+
+    const oldId = document.getElementById('edit-manufacturer-old-id').value;
+    const newName = document.getElementById('edit-manufacturer-name').value.trim();
+    const newId = document.getElementById('edit-manufacturer-id').value.trim().toLowerCase();
+
+    if (!newName || !newId) {
+        alert('Veuillez remplir tous les champs');
+        return;
+    }
+
+    // Check for duplicate ID (excluding the current manufacturer)
+    if (newId !== oldId && catalog.manufacturers.some(m => m.id === newId)) {
+        alert('Un fabricant avec cet ID existe déjà');
+        return;
+    }
+
+    try {
+        // Update manufacturer
+        const manufacturer = catalog.manufacturers.find(m => m.id === oldId);
+        if (manufacturer) {
+            manufacturer.name = newName;
+            manufacturer.id = newId;
+        }
+
+        // Update wings if ID changed
+        if (newId !== oldId) {
+            catalog.wings.forEach(wing => {
+                if (wing.manufacturer === oldId) {
+                    wing.manufacturer = newId;
+                    // Update fullName
+                    wing.fullName = `${newName} ${wing.model}`;
+                }
+            });
+        } else {
+            // Just update fullName for name changes
+            catalog.wings.forEach(wing => {
+                if (wing.manufacturer === newId) {
+                    wing.fullName = `${newName} ${wing.model}`;
+                }
+            });
+        }
+
+        catalog.lastUpdated = new Date().toISOString();
+
+        await saveCatalog();
+
+        closeModal('edit-manufacturer-modal');
+        renderManufacturersList();
+        renderCatalog();
+        updateStats();
+
+        alert('Fabricant modifié !');
+    } catch (error) {
+        alert('Erreur: ' + error.message);
+        console.error('Save manufacturer error:', error);
+        // Reload to restore state
+        refreshCatalog();
+    }
+}
+
+function deleteManufacturer(id) {
+    const manufacturer = catalog.manufacturers.find(m => m.id === id);
+    if (!manufacturer) return;
+
+    const wingCount = catalog.wings.filter(w => w.manufacturer === id).length;
+
+    pendingDeleteManufacturerId = id;
+    document.getElementById('delete-manufacturer-name').textContent = manufacturer.name;
+
+    const warningEl = document.getElementById('delete-manufacturer-warning');
+    const deleteBtn = document.getElementById('confirm-delete-manufacturer-btn');
+
+    if (wingCount > 0) {
+        warningEl.textContent = `⚠️ Ce fabricant a ${wingCount} voile${wingCount > 1 ? 's' : ''} associée${wingCount > 1 ? 's' : ''}. Supprimez d'abord les voiles.`;
+        deleteBtn.disabled = true;
+    } else {
+        warningEl.textContent = '';
+        deleteBtn.disabled = false;
+    }
+
+    document.getElementById('delete-manufacturer-modal').classList.add('show');
+}
+
+async function confirmDeleteManufacturer() {
+    if (!pendingDeleteManufacturerId || !githubToken) return;
+
+    const wingCount = catalog.wings.filter(w => w.manufacturer === pendingDeleteManufacturerId).length;
+    if (wingCount > 0) {
+        alert('Impossible de supprimer un fabricant avec des voiles associées');
+        return;
+    }
+
+    try {
+        catalog.manufacturers = catalog.manufacturers.filter(m => m.id !== pendingDeleteManufacturerId);
+        catalog.lastUpdated = new Date().toISOString();
+
+        await saveCatalog();
+
+        closeModal('delete-manufacturer-modal');
+        pendingDeleteManufacturerId = null;
+        renderManufacturersList();
+        updateStats();
+
+        alert('Fabricant supprimé !');
+    } catch (error) {
+        alert('Erreur: ' + error.message);
+        console.error('Delete manufacturer error:', error);
+        refreshCatalog();
     }
 }

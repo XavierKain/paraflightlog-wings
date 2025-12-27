@@ -40,6 +40,9 @@
             <button class="btn btn-primary" onclick="showAddWingModal()" id="add-wing-btn" disabled>
                 + Ajouter une voile
             </button>
+            <button class="btn btn-secondary" onclick="showManufacturersModal()" id="manage-manufacturers-btn" disabled>
+                Gérer les fabricants
+            </button>
             <button class="btn btn-secondary" onclick="refreshCatalog()">
                 Rafraîchir
             </button>
@@ -128,6 +131,70 @@
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Annuler</button>
                 <button class="btn btn-danger" onclick="confirmDelete()">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manufacturers Modal -->
+    <div id="manufacturers-modal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeModal('manufacturers-modal')">&times;</span>
+            <h2>Gérer les fabricants</h2>
+
+            <!-- Add Manufacturer Form -->
+            <div class="manufacturer-add-form">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <input type="text" id="new-manufacturer-name" placeholder="Nom du fabricant (ex: Skywalk)">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" id="new-manufacturer-id" placeholder="ID (ex: skywalk)">
+                    </div>
+                    <button class="btn btn-primary" onclick="addManufacturer()">Ajouter</button>
+                </div>
+            </div>
+
+            <!-- Manufacturers List -->
+            <div class="manufacturers-list" id="manufacturers-list">
+                <p class="loading">Chargement...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Manufacturer Modal -->
+    <div id="edit-manufacturer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('edit-manufacturer-modal')">&times;</span>
+            <h2>Modifier le fabricant</h2>
+            <form id="edit-manufacturer-form" onsubmit="saveManufacturer(event)">
+                <input type="hidden" id="edit-manufacturer-old-id">
+                <div class="form-group">
+                    <label for="edit-manufacturer-name">Nom</label>
+                    <input type="text" id="edit-manufacturer-name" required placeholder="Nom du fabricant">
+                </div>
+                <div class="form-group">
+                    <label for="edit-manufacturer-id">ID (utilisé dans les URLs)</label>
+                    <input type="text" id="edit-manufacturer-id" required placeholder="ID unique" pattern="[a-z0-9\-]+" title="Lettres minuscules, chiffres et tirets uniquement">
+                </div>
+                <p class="form-hint">⚠️ Modifier l'ID mettra à jour toutes les voiles associées.</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('edit-manufacturer-modal')">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Manufacturer Modal -->
+    <div id="delete-manufacturer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('delete-manufacturer-modal')">&times;</span>
+            <h2>Supprimer le fabricant</h2>
+            <p>Êtes-vous sûr de vouloir supprimer <strong id="delete-manufacturer-name"></strong> ?</p>
+            <p id="delete-manufacturer-warning" class="warning-text"></p>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal('delete-manufacturer-modal')">Annuler</button>
+                <button class="btn btn-danger" id="confirm-delete-manufacturer-btn" onclick="confirmDeleteManufacturer()">Supprimer</button>
             </div>
         </div>
     </div>
