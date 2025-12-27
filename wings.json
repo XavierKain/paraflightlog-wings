@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T21:51:12.953Z",
+  "lastUpdated": "2025-12-27T21:51:27.302Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -43,8 +43,8 @@
     {
       "id": "moustache-m2",
       "manufacturer": "flare",
-      "model": "M2",
-      "fullName": "Flare M2",
+      "model": "Moustache M2",
+      "fullName": "Flare Moustache M2",
       "type": "Soaring",
       "sizes": [
         "13",
