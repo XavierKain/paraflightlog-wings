@@ -261,17 +261,22 @@ function renderCatalog() {
             ? `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${wing.imageUrl}?t=${Date.now()}`
             : null;
 
+        // Affichage: Titre = modèle seul, Sous-titre = marque • type • année
+        const displayName = wing.model || wing.fullName;
+        const metaParts = [manufacturer?.name || 'Inconnu', wing.type];
+        if (wing.year) metaParts.push(wing.year);
+
         return `
             <div class="wing-card">
                 ${imageUrl
-                    ? `<img src="${imageUrl}" alt="${wing.fullName}" class="wing-image">`
+                    ? `<img src="${imageUrl}" alt="${displayName}" class="wing-image">`
                     : `<div class="wing-image no-image">🪂</div>`
                 }
                 <div class="wing-info">
-                    <div class="wing-name">${wing.fullName}</div>
-                    <div class="wing-meta">${manufacturer?.name || 'Inconnu'} • ${wing.type}${wing.year ? ` • ${wing.year}` : ''}</div>
+                    <div class="wing-name">${displayName}</div>
+                    <div class="wing-meta">${metaParts.join(' • ')}</div>
                     <div class="wing-sizes">
-                        ${wing.sizes.map(s => `<span class="size-tag">${s}m</span>`).join('')}
+                        ${wing.sizes.map(s => `<span class="size-tag">${s}m²</span>`).join('')}
                     </div>
                 </div>
                 <div class="wing-actions">
@@ -358,8 +363,8 @@ async function saveWing(event) {
     const sizes = document.getElementById('wing-sizes').value.split(',').map(s => s.trim()).filter(s => s);
     const imageFile = document.getElementById('wing-image').files[0];
 
-    const manufacturerObj = catalog.manufacturers.find(m => m.id === manufacturer);
-    const fullName = manufacturerObj ? `${manufacturerObj.name} ${model}` : model;
+    // fullName = juste le modèle (la marque est récupérée via manufacturer)
+    const fullName = model;
     const wingId = id || `${manufacturer}-${model.toLowerCase().replace(/\s+/g, '-')}`;
     const imageFilename = `images/${wingId}.png`;
 
@@ -735,20 +740,11 @@ async function saveManufacturer(event) {
             manufacturer.id = newId;
         }
 
-        // Update wings if ID changed
+        // Update wings if ID changed (fullName reste le modèle seul)
         if (newId !== oldId) {
             catalog.wings.forEach(wing => {
                 if (wing.manufacturer === oldId) {
                     wing.manufacturer = newId;
-                    // Update fullName
-                    wing.fullName = `${newName} ${wing.model}`;
-                }
-            });
-        } else {
-            // Just update fullName for name changes
-            catalog.wings.forEach(wing => {
-                if (wing.manufacturer === newId) {
-                    wing.fullName = `${newName} ${wing.model}`;
                 }
             });
         }
