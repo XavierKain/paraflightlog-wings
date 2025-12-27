@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-27T20:02:33.319Z",
+  "lastUpdated": "2025-12-27T20:03:55.300Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -43,8 +43,8 @@
     {
       "id": "moustache-m2",
       "manufacturer": "flare",
-      "model": "Moustache M2",
-      "fullName": "Flare Moustache M2",
+      "model": "M2",
+      "fullName": "Flare M2",
       "type": "Soaring",
       "sizes": [
         "13",
@@ -105,9 +105,9 @@
     },
     {
       "id": "other-line",
-      "manufacturer": "other",
+      "manufacturer": "flare",
       "model": "Line",
-      "fullName": "Line",
+      "fullName": "Flare Line",
       "type": "Speedflying",
       "sizes": [
         "13",
@@ -115,22 +115,6 @@
         "17"
       ],
       "imageUrl": "images/line.png",
-      "year": null
-    },
-    {
-      "id": "flare-moustache-m2",
-      "manufacturer": "flare",
-      "model": "Moustache M2",
-      "fullName": "Flare Moustache M2",
-      "type": "Soaring",
-      "sizes": [
-        "13",
-        "15",
-        "18",
-        "22",
-        "26"
-      ],
-      "imageUrl": "images/flare-moustache-m2.png",
       "year": null
     }
   ]
