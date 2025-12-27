@@ -65,9 +65,11 @@ async function validateToken() {
             const user = await response.json();
             showLoggedIn(user.login);
         } else {
+            console.warn('Token invalide ou expiré, déconnexion...');
             logout();
         }
-    } catch {
+    } catch (error) {
+        console.error('Erreur de validation du token:', error);
         logout();
     }
 }
