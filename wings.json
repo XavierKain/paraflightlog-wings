@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-28T09:23:24.283Z",
+  "lastUpdated": "2025-12-28T09:29:09.471Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -129,8 +129,8 @@
     {
       "id": "dudek-touch",
       "manufacturer": "dudek",
-      "model": "Touch Black",
-      "fullName": "Touch Black",
+      "model": "Touch Red",
+      "fullName": "Touch Red",
       "type": "Soaring",
       "sizes": [
         "15",
