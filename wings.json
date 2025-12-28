@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-12-28T09:29:09.471Z",
+  "lastUpdated": "2025-12-28T09:29:24.632Z",
   "manufacturers": [
     {
       "id": "flare",
@@ -124,37 +124,6 @@
         "22"
       ],
       "imageUrl": "images/flare-bandit.png",
-      "year": null
-    },
-    {
-      "id": "dudek-touch",
-      "manufacturer": "dudek",
-      "model": "Touch Red",
-      "fullName": "Touch Red",
-      "type": "Soaring",
-      "sizes": [
-        "15",
-        "18",
-        "22",
-        "26"
-      ],
-      "imageUrl": "images/dudek-touch.png",
-      "year": null
-    },
-    {
-      "id": "dudek-touch",
-      "manufacturer": "dudek",
-      "model": "Touch",
-      "fullName": "Touch",
-      "type": "Soaring",
-      "sizes": [
-        "13",
-        "15",
-        "18",
-        "22",
-        "26"
-      ],
-      "imageUrl": "images/dudek-touch.png",
       "year": null
     }
   ]
